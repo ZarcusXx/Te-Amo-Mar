@@ -1,84 +1,84 @@
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Para Mar ❤️</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+<title>Para Mar ❤️</title>
 
-        body {
-            background: black;
-            overflow: hidden;
-            width: 100vw;
-            height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
+<style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
 
-        canvas {
-            display: block;
-            width: 100%;
-            height: 100%;
-        }
+    html, body {
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        background: #000;
+    }
 
-        #mensaje {
-            position: absolute;
-            left: 50%;
-            top: 50%;
+    canvas {
+        position: fixed;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+    }
 
-            transform: translate(-50%, -50%) scale(0);
+    #mensaje {
+        position: fixed;
+        left: 50%;
+        top: 50%;
 
-            color: #ff69b4;
-            font-family: Arial, sans-serif;
-            font-size: clamp(28px, 8vw, 55px);
-            font-weight: bold;
+        transform: translate(-50%, -50%) scale(0);
 
-            text-align: center;
-            white-space: nowrap;
+        color: #ff69b4;
+        font-family: Arial, sans-serif;
+        font-size: clamp(30px, 9vw, 60px);
+        font-weight: bold;
+        text-align: center;
 
-            text-shadow:
-                0 0 5px #ff69b4,
-                0 0 15px #ff1493,
-                0 0 30px #ff1493;
+        text-shadow:
+            0 0 5px #ff69b4,
+            0 0 15px #ff1493,
+            0 0 30px #ff1493,
+            0 0 60px #ff1493;
 
-            opacity: 0;
+        opacity: 0;
 
-            transition:
-                transform 1s ease,
-                opacity 1s ease;
-        }
+        transition:
+            transform 1s ease,
+            opacity 1s ease;
 
-        #mensaje.mostrar {
-            transform: translate(-50%, -50%) scale(1);
-            opacity: 1;
-        }
+        z-index: 10;
+        white-space: nowrap;
+    }
 
-        #instruccion {
-            position: absolute;
-            bottom: 25px;
-            width: 100%;
-            text-align: center;
+    #mensaje.mostrar {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 1;
+    }
 
-            color: #777;
-            font-family: Arial, sans-serif;
-            font-size: 14px;
+    #instruccion {
+        position: fixed;
+        bottom: 25px;
+        width: 100%;
 
-            transition: opacity 1s;
-        }
-    </style>
+        color: #888;
+        font-family: Arial, sans-serif;
+        text-align: center;
+        font-size: 15px;
+
+        z-index: 10;
+    }
+</style>
 </head>
 
 <body>
 
-<canvas id="corazon"></canvas>
+<canvas id="canvas"></canvas>
 
 <div id="mensaje">
     TE AMO MAR ❤️
@@ -90,7 +90,7 @@
 
 <script>
 
-const canvas = document.getElementById("corazon");
+const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
 
 const mensaje = document.getElementById("mensaje");
@@ -99,49 +99,66 @@ const instruccion = document.getElementById("instruccion");
 let ancho;
 let alto;
 
-function ajustarPantalla() {
-    ancho = canvas.width = window.innerWidth;
-    alto = canvas.height = window.innerHeight;
+function ajustarCanvas() {
+
+    const dpr = window.devicePixelRatio || 1;
+
+    ancho = window.innerWidth;
+    alto = window.innerHeight;
+
+    canvas.width = ancho * dpr;
+    canvas.height = alto * dpr;
+
+    canvas.style.width = ancho + "px";
+    canvas.style.height = alto + "px";
+
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 }
 
-ajustarPantalla();
+ajustarCanvas();
 
-window.addEventListener("resize", ajustarPantalla);
+window.addEventListener("resize", ajustarCanvas);
 
 
-// ----------------------------------
-// CONFIGURACIÓN DEL CORAZÓN
-// ----------------------------------
+// ==============================
+// CREAR CORAZÓN
+// ==============================
 
-const puntos = 320;
 const particulas = [];
 
+const cantidad = 500;
 
-// ----------------------------------
-// CREAR CORAZÓN
-// ----------------------------------
+for (let i = 0; i < cantidad; i++) {
 
-for (let i = 0; i < puntos; i++) {
+    const t = Math.random() * Math.PI * 2;
 
-    const a = 2 * Math.PI * i / puntos;
+    // Fórmula matemática del corazón
+    const hx = 16 * Math.pow(Math.sin(t), 3);
 
-    let x =
-        16 * Math.pow(Math.sin(a), 3);
+    const hy =
+        13 * Math.cos(t)
+        - 5 * Math.cos(2 * t)
+        - 2 * Math.cos(3 * t)
+        - Math.cos(4 * t);
 
-    let y =
-        13 * Math.cos(a)
-        - 5 * Math.cos(2 * a)
-        - 2 * Math.cos(3 * a)
-        - Math.cos(4 * a);
+    // Hacer partículas también dentro del corazón
+    const profundidad = Math.sqrt(Math.random());
+
+    const x = hx * profundidad;
+    const y = hy * profundidad;
 
     particulas.push({
+
         x: x,
         y: y,
 
         progreso: 0,
 
         velocidad:
-            0.01 + Math.random() * 0.02,
+            0.006 + Math.random() * 0.012,
+
+        tamaño:
+            1 + Math.random() * 2,
 
         brillo:
             Math.random() * Math.PI * 2
@@ -149,64 +166,136 @@ for (let i = 0; i < puntos; i++) {
 }
 
 
-// ----------------------------------
-// ESCALA DEL CORAZÓN
-// ----------------------------------
-
-function escala() {
-
-    return Math.min(ancho, alto) * 0.025;
-}
-
-
-// ----------------------------------
+// ==============================
 // ANIMACIÓN
-// ----------------------------------
+// ==============================
 
 let tiempo = 0;
 let terminado = false;
 
-function dibujar() {
+function animar() {
 
     ctx.clearRect(0, 0, ancho, alto);
 
-    tiempo += 0.02;
+    tiempo += 0.03;
 
     const centroX = ancho / 2;
     const centroY = alto / 2;
 
-    const escalaActual = escala();
+    // Escala adaptada al celular o PC
+    const escala =
+        Math.min(ancho, alto) * 0.025;
 
 
-    // ------------------------------
-    // DIBUJAR PARTÍCULAS
-    // ------------------------------
+    let todosTerminados = true;
 
-    for (let i = 0; i < particulas.length; i++) {
 
-        const p = particulas[i];
+    for (const p of particulas) {
 
         if (p.progreso < 1) {
+
             p.progreso += p.velocidad;
+
+            todosTerminados = false;
         }
 
+
+        // Posición final
         const finalX =
-            centroX + p.x * escalaActual;
+            centroX + p.x * escala;
 
         const finalY =
-            centroY - p.y * escalaActual;
+            centroY - p.y * escala;
 
 
-        // Punto que nace desde el interior
+        // Posición inicial
         const inicioX =
-            centroX + p.x * escalaActual * 0.45;
+            centroX;
 
         const inicioY =
-            centroY - p.y * escalaActual * 0.45;
+            centroY;
 
 
+        // Movimiento hacia el corazón
         const x =
             inicioX +
             (finalX - inicioX) * p.progreso;
 
         const y =
+            inicioY +
+            (finalY - inicioY) * p.progreso;
+
+
+        // Brillo
+        const brillo =
+            0.7 +
+            Math.sin(
+                tiempo * 3 + p.brillo
+            ) * 0.3;
+
+
+        // Dibujar partícula
+        ctx.beginPath();
+
+        ctx.arc(
+            x,
+            y,
+            p.tamaño,
+            0,
+            Math.PI * 2
+        );
+
+
+        ctx.fillStyle =
+            `rgba(255, ${80 + brillo * 100}, ${150 + brillo * 100}, ${brillo})`;
+
+
+        ctx.shadowBlur = 12;
+
+        ctx.shadowColor = "#ff1493";
+
+        ctx.fill();
+
+        ctx.shadowBlur = 0;
+    }
+
+
+    // Cuando termina el corazón
+    if (todosTerminados && !terminado) {
+
+        terminado = true;
+
+        setTimeout(() => {
+
+            mensaje.classList.add("mostrar");
+
+            instruccion.style.opacity = "0";
+
+        }, 700);
+    }
+
+
+    requestAnimationFrame(animar);
+}
+
+
+// Iniciar
+animar();
+
+
+// ==============================
+// TOCAR / HACER CLICK
+// ==============================
+
+document.body.addEventListener("click", () => {
+
+    mensaje.classList.add("mostrar");
+
+    instruccion.style.opacity = "0";
+
+});
+
+</script>
+
+</body>
+</html>
