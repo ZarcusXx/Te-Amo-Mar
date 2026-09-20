@@ -1,0 +1,212 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Para Mar ❤️</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: black;
+            overflow: hidden;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+
+        #mensaje {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+
+            transform: translate(-50%, -50%) scale(0);
+
+            color: #ff69b4;
+            font-family: Arial, sans-serif;
+            font-size: clamp(28px, 8vw, 55px);
+            font-weight: bold;
+
+            text-align: center;
+            white-space: nowrap;
+
+            text-shadow:
+                0 0 5px #ff69b4,
+                0 0 15px #ff1493,
+                0 0 30px #ff1493;
+
+            opacity: 0;
+
+            transition:
+                transform 1s ease,
+                opacity 1s ease;
+        }
+
+        #mensaje.mostrar {
+            transform: translate(-50%, -50%) scale(1);
+            opacity: 1;
+        }
+
+        #instruccion {
+            position: absolute;
+            bottom: 25px;
+            width: 100%;
+            text-align: center;
+
+            color: #777;
+            font-family: Arial, sans-serif;
+            font-size: 14px;
+
+            transition: opacity 1s;
+        }
+    </style>
+</head>
+
+<body>
+
+<canvas id="corazon"></canvas>
+
+<div id="mensaje">
+    TE AMO MAR ❤️
+</div>
+
+<div id="instruccion">
+    Para vos, Mar ❤️
+</div>
+
+<script>
+
+const canvas = document.getElementById("corazon");
+const ctx = canvas.getContext("2d");
+
+const mensaje = document.getElementById("mensaje");
+const instruccion = document.getElementById("instruccion");
+
+let ancho;
+let alto;
+
+function ajustarPantalla() {
+    ancho = canvas.width = window.innerWidth;
+    alto = canvas.height = window.innerHeight;
+}
+
+ajustarPantalla();
+
+window.addEventListener("resize", ajustarPantalla);
+
+
+// ----------------------------------
+// CONFIGURACIÓN DEL CORAZÓN
+// ----------------------------------
+
+const puntos = 320;
+const particulas = [];
+
+
+// ----------------------------------
+// CREAR CORAZÓN
+// ----------------------------------
+
+for (let i = 0; i < puntos; i++) {
+
+    const a = 2 * Math.PI * i / puntos;
+
+    let x =
+        16 * Math.pow(Math.sin(a), 3);
+
+    let y =
+        13 * Math.cos(a)
+        - 5 * Math.cos(2 * a)
+        - 2 * Math.cos(3 * a)
+        - Math.cos(4 * a);
+
+    particulas.push({
+        x: x,
+        y: y,
+
+        progreso: 0,
+
+        velocidad:
+            0.01 + Math.random() * 0.02,
+
+        brillo:
+            Math.random() * Math.PI * 2
+    });
+}
+
+
+// ----------------------------------
+// ESCALA DEL CORAZÓN
+// ----------------------------------
+
+function escala() {
+
+    return Math.min(ancho, alto) * 0.025;
+}
+
+
+// ----------------------------------
+// ANIMACIÓN
+// ----------------------------------
+
+let tiempo = 0;
+let terminado = false;
+
+function dibujar() {
+
+    ctx.clearRect(0, 0, ancho, alto);
+
+    tiempo += 0.02;
+
+    const centroX = ancho / 2;
+    const centroY = alto / 2;
+
+    const escalaActual = escala();
+
+
+    // ------------------------------
+    // DIBUJAR PARTÍCULAS
+    // ------------------------------
+
+    for (let i = 0; i < particulas.length; i++) {
+
+        const p = particulas[i];
+
+        if (p.progreso < 1) {
+            p.progreso += p.velocidad;
+        }
+
+        const finalX =
+            centroX + p.x * escalaActual;
+
+        const finalY =
+            centroY - p.y * escalaActual;
+
+
+        // Punto que nace desde el interior
+        const inicioX =
+            centroX + p.x * escalaActual * 0.45;
+
+        const inicioY =
+            centroY - p.y * escalaActual * 0.45;
+
+
+        const x =
+            inicioX +
+            (finalX - inicioX) * p.progreso;
+
+        const y =
